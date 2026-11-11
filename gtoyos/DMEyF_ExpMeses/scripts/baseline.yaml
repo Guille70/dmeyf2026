@@ -1,0 +1,33 @@
+# Baseline de los experimentos colaborativos (consigna de la catedra).
+# Cada experimento del grupo es una copia de este yaml cambiando meses_train.
+# --------------------------------------------------------------------- identidad
+nombre: baseline
+pregunta: Baseline de la catedra. Train 201903-201906 full, valida 201908, test 201910.
+
+# ------------------------------------------------------------------------- datos
+dataset: data/competencia_02_lags.parquet
+
+meses_train: [201903, 201904, 201905, 201906] # Apilados, sin sampling
+mes_validacion: 201908 # Ordena los trials de Optuna (AUC) y hace early stopping
+mes_test: 201910       # SOLO para comparar experimentos. Nunca entra en la optimizacion.
+
+# ----------------------------------------------------------- optimizacion (Optuna)
+trials: 50
+semilla: 100019
+
+# Escalar = fijo, lista [min, max] = rango que busca Optuna
+num_leaves: [8, 256]
+learning_rate: [0.01, 0.3]         # escala log
+min_data_in_leaf: [20, 5000]       # escala log
+feature_fraction: [0.1, 1.0]
+bagging_fraction: [0.3, 1.0]
+bagging_freq: 1
+
+num_iterations_max: 5000           # techo; el corte real lo pone el early stopping
+early_stopping_rounds: 100
+
+# ------------------------------------------------------------------------- test
+# Con los mejores hiperparametros se reentrena con varias semillas y se mide 201910.
+# Asi cada experimento reporta media +- desvio: sin eso no se puede decir si una
+# diferencia de AUC entre experimentos es real o ruido de la semilla.
+semillas_test: 5
